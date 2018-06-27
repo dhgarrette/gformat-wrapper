@@ -33,15 +33,18 @@ where the `OPTIONS` are what's below.
 Exactly of the following arguments must be specified:
 
     commit
-      Formats all Java files modified since the last commit.
-        DEFAULT
+        Formats all Java files modified since the last commit.
+        This is the default.
+
     push
         Formats all Java files modified since the last push to the current branch.
+
     remote REPO BRANCH
         Formats all Java files modified since the last push to the given branch of
         the given repo. (E.g. `remote origin master`).
+
     all
-        Formats all Java files below the current directory.
+        Formats all Java files within (and below) the current directory.
 
 ### Options
 
