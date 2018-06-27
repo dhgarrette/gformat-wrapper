@@ -36,16 +36,14 @@ Exactly of the following arguments must be specified:
       Formats all Java files modified since the last commit.
         DEFAULT
     push
-        Formats all Java files modified since the last push to the current
-        branch.
+        Formats all Java files modified since the last push to the current branch.
     remote REPO BRANCH
-        Formats all Java files modified since the last push to the given
-        branch of the given repo. (E.g. `remote origin master`).
+        Formats all Java files modified since the last push to the given branch of
+        the given repo. (E.g. `remote origin master`).
     all
         Formats all Java files below the current directory.
 
 ### Options
 
     --dryrun, -d
-        Show the files that would be formatted without actually
-        modifying them.
+        Show the files that would be formatted without actually modifying them.
