@@ -1,6 +1,8 @@
+from __future__ import print_function
+
 # Point this to your location of the jar downloaded from:
 #   https://github.com/google/google-java-format/releases
-formatter_jar = '/Users/dhg/google-java-format-1.6-all-deps.jar'
+formatter_jar = '/u/dhg/google-java-format-1.7-all-deps.jar'
 
 
 
@@ -34,7 +36,7 @@ def generate_hash(filename):
 
 def parse_porcelain(command_line_args):
   return_list = []
-  for line in subprocess.check_output(['git'] + command_line_args).splitlines():
+  for line in subprocess.check_output(['git'] + command_line_args, universal_newlines=True).splitlines():
     split = line.strip().split()
     if len(split) == 2 and not (set(split[0]) - set(['M', 'A'])) and split[1].endswith('.java'):
       return_list.append(split[1])
@@ -81,7 +83,7 @@ for filename in files_to_check:
   if not os.path.isfile(filename): continue
 
   hash_before = generate_hash(filename)
-  print 'checking', filename
+  print('checking', filename)
   if options.dryrun:
     hash_after = hashlib.md5(subprocess.check_output(['java', '-jar', formatter_jar, filename])).hexdigest()
   else:
@@ -89,10 +91,10 @@ for filename in files_to_check:
     hash_after = generate_hash(filename)
   (unchanged if hash_before == hash_after else changed).append(filename)
 
-print ''
+print()
 for (label, files) in [('Unchanged', unchanged),
                        ('Changed', changed)]:
-  print label, 'files'+(' (dry run)' if options.dryrun else '')+':'
+  print(label, 'files'+(' (dry run)' if options.dryrun else '')+':')
   for filename in files:
-    print '   ', filename
-  print ''
+    print('   ', filename)
+  print()
