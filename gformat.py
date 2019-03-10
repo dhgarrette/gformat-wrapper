@@ -58,13 +58,13 @@ if args[0] == 'push':
                       if line.startswith('*')]
   remote_branch = re.match(r'\*\s+\S+\s+[\da-f]{7} \[([^\]:]+)[\]:].*', branch_line).group(1)
   remote_sha = run_command(['git', 'rev-parse', remote_branch]).strip()
-  files_to_check.extend(parse_porcelain(['diff', '--name-status', head_sha, remote_sha]))
+  files_to_check.extend(parse_porcelain(['diff', '--name-status', remote_sha, head_sha]))
 
 if args[0] == 'remote':
   head_sha = run_command(['git', 'rev-parse', 'HEAD']).strip()
   remote_branch = '/'.join(args[1:3])
   remote_sha = run_command(['git', 'rev-parse', remote_branch]).strip()
-  files_to_check.extend(parse_porcelain(['diff', '--name-status', head_sha, remote_sha]))
+  files_to_check.extend(parse_porcelain(['diff', '--name-status', remote_sha, head_sha]))
 
 if args[0] == 'all':
   for root, dirs, files in os.walk('.'):
