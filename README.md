@@ -30,23 +30,25 @@ where the `OPTIONS` are what's below.
 
 ### Arguments
 
-Exactly of the following arguments must be specified:
+Exactly one of the following arguments must be specified:
 
     commit
-        Formats all Java files modified since the last commit.
-        This is the default.
-
-    push
-        Formats all Java files modified since the last push to the current branch.
-
-    remote REPO BRANCH
-        Formats all Java files modified since the last push to the given branch of
-        the given repo. (E.g. `remote origin master`).
-
-    all
-        Formats all Java files within (and below) the current directory.
+      Formats all Java files modified since the last commit.
+    branch [OTHER_BRANCH]
+      Formats all Java files modified since diverging from OTHER_BRANCH.
+      Defaults to 'origin/master'.
+    all PATHS...
+      Formats all Java files within (and below) the specified paths.
 
 ### Options
 
     --dryrun, -d
         Show the files that would be formatted without actually modifying them.
+
+### Examples
+
+Format everything modified on this branch: `gformat.py branch`
+
+Format a single file: `gformat.py all path/to/file.java`
+
+Format everything within directory 'src': `gformat.py all src`
