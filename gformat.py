@@ -34,9 +34,12 @@ else:
 def generate_hash(filename):
   return hashlib.md5(open(filename, 'rb').read()).hexdigest()
 
+def run_command(command_parts):
+  return subprocess.check_output(command_parts, universal_newlines=True)
+
 def parse_porcelain(command_line_args):
   return_list = []
-  for line in subprocess.check_output(['git'] + command_line_args, universal_newlines=True).splitlines():
+  for line in run_command(['git'] + command_line_args).splitlines():
     split = line.strip().split()
     if len(split) == 2 and not (set(split[0]) - set(['M', 'A'])) and split[1].endswith('.java'):
       return_list.append(split[1])
@@ -49,18 +52,18 @@ if args[0] == 'commit':
   files_to_check.extend(parse_porcelain(['status', '--porcelain']))
 
 if args[0] == 'push':
-  head_sha = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()
+  head_sha = run_command(['git', 'rev-parse', 'HEAD']).strip()
   branch_line, = [line.strip()
-                      for line in subprocess.check_output(['git', 'branch', '-vv']).splitlines()
+                      for line in run_command(['git', 'branch', '-vv']).splitlines()
                       if line.startswith('*')]
   remote_branch = re.match(r'\*\s+\S+\s+[\da-f]{7} \[([^\]:]+)[\]:].*', branch_line).group(1)
-  remote_sha = subprocess.check_output(['git', 'rev-parse', remote_branch]).strip()
+  remote_sha = run_command(['git', 'rev-parse', remote_branch]).strip()
   files_to_check.extend(parse_porcelain(['diff', '--name-status', head_sha, remote_sha]))
 
 if args[0] == 'remote':
-  head_sha = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()
+  head_sha = run_command(['git', 'rev-parse', 'HEAD']).strip()
   remote_branch = '/'.join(args[1:3])
-  remote_sha = subprocess.check_output(['git', 'rev-parse', remote_branch]).strip()
+  remote_sha = run_command(['git', 'rev-parse', remote_branch]).strip()
   files_to_check.extend(parse_porcelain(['diff', '--name-status', head_sha, remote_sha]))
 
 if args[0] == 'all':
@@ -85,7 +88,7 @@ for filename in files_to_check:
   hash_before = generate_hash(filename)
   print('checking', filename)
   if options.dryrun:
-    hash_after = hashlib.md5(subprocess.check_output(['java', '-jar', formatter_jar, filename])).hexdigest()
+    hash_after = hashlib.md5(run_command(['java', '-jar', formatter_jar, filename])).hexdigest()
   else:
     subprocess.call(['java', '-jar', formatter_jar, '--replace', filename])
     hash_after = generate_hash(filename)
