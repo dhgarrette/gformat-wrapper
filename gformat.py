@@ -55,9 +55,9 @@ def run_command(command_parts):
   return subprocess.check_output(command_parts, universal_newlines=True)
 
 def run_git_command(command_line_args):
-  print('$ git %s' % (' '.join(command_line_args)))
+  # print('$ git %s' % (' '.join(command_line_args)))
   result = run_command(['git'] + command_line_args)
-  print(result)
+  # print(result)
   return result
 
 def parse_porcelain(command_line_args):
