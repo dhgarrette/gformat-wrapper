@@ -6,6 +6,7 @@ formatter_jar = '/u/dhg/google-java-format-1.7-all-deps.jar'
 
 
 
+import glob
 import hashlib
 from optparse import OptionParser
 import os
@@ -41,7 +42,7 @@ elif args[0] == 'commit':
 elif args[0] == 'branch':
   assert(1 <= len(args) <= 2)
 elif args[0] == 'all':
-  assert(len(args) > 1)
+  assert(len(args) >= 1)
 else:
   print('invalid argument: %s' % (' '.join(args[0])))
   parser.print_help()
@@ -55,9 +56,9 @@ def run_command(command_parts):
   return subprocess.check_output(command_parts, universal_newlines=True)
 
 def run_git_command(command_line_args):
-  # print('$ git %s' % (' '.join(command_line_args)))
   result = run_command(['git'] + command_line_args)
-  # print(result)
+  if options.verbose:
+    print('$ git %s\n%s' % (' '.join(command_line_args), result))
   return result
 
 def parse_porcelain(command_line_args):
@@ -83,33 +84,50 @@ def oldest_common_ancestor(branch1, branch2):
   assert False
 
 
-files_to_check = []
+files_to_check = set()
 
 if args[0] == 'commit':
-  files_to_check.extend(parse_porcelain(['status', '--porcelain']))
+  files_to_check.update(parse_porcelain(['status', '--porcelain']))
 
-if args[0] == 'branch':
+elif args[0] == 'branch':
   head_sha = run_git_command(['rev-parse', 'HEAD']).strip()
   prev_sha = oldest_common_ancestor(branch_name(), 'master' if len(args) == 1 else args[1])
-  files_to_check.extend(parse_porcelain(['diff', '--name-status', prev_sha, head_sha]))
+  files_to_check.update(parse_porcelain(['diff', '--name-status', prev_sha, head_sha]))
 
-if args[0] == 'all':
-  for root, dirs, files in os.walk('.'):
-    if root == '.':
-      dirs.remove('target')
-    hidden_files = [d for d in dirs if d.startswith('.')]
-    for h in hidden_files:
-      dirs.remove(h)
-    for f in files:
-      if f.endswith('.java'):
-        files_to_check.append(os.path.join(root, f))
+elif args[0] == 'all':
+  unglobbed = set()
+  for arg in args[1:]:
+    unglobbed.update(glob.glob(arg))
+  if not unglobbed:
+    unglobbed.add('.')
+  if options.verbose:
+    print('unglobbed:')
+    for path in sorted(unglobbed):
+      print('  %s' % (path))
 
+  files_to_check.update(unglobbed)
+
+  for path in sorted(unglobbed):
+    for root, dirs, files in os.walk(path):
+      if root == '.':
+        dirs.remove('target')
+      hidden_files = [d for d in dirs if d.startswith('.')]
+      for h in hidden_files:
+        dirs.remove(h)
+      for f in files:
+        files_to_check.add(os.path.join(root, f))
+
+
+print('files_to_check:')
+for path in sorted(files_to_check):
+  print('  %s' % (path))
 
 unchanged = []
 changed = []
 
 for filename in files_to_check:
   if not os.path.isfile(filename): continue
+  if not filename.endswith('.java'): continue
 
   hash_before = generate_hash(filename)
   print('checking', filename)
